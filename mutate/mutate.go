@@ -18,18 +18,18 @@ func Mutate(body []byte) (responseBody []byte, err error) {
 	if err = json.Unmarshal(body, &admReview); err != nil {
 		return nil, fmt.Errorf("unmarshaling request failed with %s", err)
 	}
-	ar := admReview.Request
-	if ar == nil {
+	if admReview.Request == nil {
 		return responseBody, nil
 	}
 
 	// get the Pod object and unmarshal it into its struct, if we cannot, we might as well stop here
-	if err := json.Unmarshal(ar.Object.Raw, &pod); err != nil {
+	if err := json.Unmarshal(admReview.Request.Object.Raw, &pod); err != nil {
 		return nil, fmt.Errorf("unable unmarshal pod json object %v", err)
 	}
+
 	// set response options
 	admResp.Allowed = true
-	admResp.UID = ar.UID
+	admResp.UID = admReview.Request.UID
 	pT := v1beta1.PatchTypeJSONPatch
 	admResp.PatchType = &pT // it's annoying that this needs to be a pointer as you cannot give a pointer to a constant?
 
