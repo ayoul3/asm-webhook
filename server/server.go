@@ -4,14 +4,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ayoul3/ssm-webhook/mutate"
 	log "github.com/sirupsen/logrus"
+	kwhlog "github.com/slok/kubewebhook/v2/pkg/log/logrus"
+	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
 )
 
 func Start() {
 	mux := http.NewServeMux()
+	logger := kwhlog.NewLogrus(log.WithField("app", "ssm-webhook"))
+	mutator := kwhmutating.MutatorFunc(mutate.SecretsMutator)
+	podHandler := handlerFor(mutator, logger)
 
 	mux.HandleFunc("/", handleRoot)
-	mux.HandleFunc("/mutate", handleMutate)
+	mux.Handle("/mutate", podHandler)
 
 	s := &http.Server{
 		Addr:           ":8443",

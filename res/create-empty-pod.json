@@ -2,7 +2,7 @@
     "kind": "AdmissionReview",
     "apiVersion": "admission.k8s.io/v1",
     "request": {
-        "uid": "d3a60b6a-3ab9-45f0-aa3a-7ce452de32a0",
+        "uid": "aba60b6a-3ab9-45f0-aa3a-7ce452de32a0",
         "kind": {
             "group": "",
             "version": "v1",
