@@ -17,25 +17,21 @@ func sendError(err error, w http.ResponseWriter) {
 }
 
 func handleMutate(w http.ResponseWriter, r *http.Request) {
-	var mutated []byte
+	var mutated, body []byte
+	var err error
 
 	log.Println("Received mutate request ...")
-	body, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
+	if body, err = ioutil.ReadAll(r.Body); err != nil {
 		sendError(err, w)
 		return
 	}
+	defer r.Body.Close()
 
-	// mutate the request
-	log.Info("Calling mutate method ...")
 	if mutated, err = m.Mutate(body); err != nil {
 		sendError(err, w)
 		return
 	}
 
-	// and write it back
 	w.WriteHeader(http.StatusOK)
 	w.Write(mutated)
 }

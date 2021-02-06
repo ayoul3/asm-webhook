@@ -12,9 +12,9 @@ import (
 // Mutate mutates
 func Mutate(body []byte) (responseBody []byte, err error) {
 	var pod *corev1.Pod
-	var resp v1beta1.AdmissionResponse
-	// unmarshal request into AdmissionReview struct
-	admReview := v1beta1.AdmissionReview{}
+	var admResp v1beta1.AdmissionResponse
+	var admReview v1beta1.AdmissionReview
+
 	if err = json.Unmarshal(body, &admReview); err != nil {
 		return nil, fmt.Errorf("unmarshaling request failed with %s", err)
 	}
@@ -28,13 +28,13 @@ func Mutate(body []byte) (responseBody []byte, err error) {
 		return nil, fmt.Errorf("unable unmarshal pod json object %v", err)
 	}
 	// set response options
-	resp.Allowed = true
-	resp.UID = ar.UID
+	admResp.Allowed = true
+	admResp.UID = ar.UID
 	pT := v1beta1.PatchTypeJSONPatch
-	resp.PatchType = &pT // it's annoying that this needs to be a pointer as you cannot give a pointer to a constant?
+	admResp.PatchType = &pT // it's annoying that this needs to be a pointer as you cannot give a pointer to a constant?
 
 	// add some audit annotations, helpful to know why a object was modified, maybe (?)
-	resp.AuditAnnotations = map[string]string{
+	admResp.AuditAnnotations = map[string]string{
 		"ssm-webhook-resp": "success",
 	}
 
@@ -53,13 +53,13 @@ func Mutate(body []byte) (responseBody []byte, err error) {
 		p = append(p, patch)
 	}
 	// parse the []map into JSON
-	resp.Patch, _ = json.Marshal(p)
+	admResp.Patch, _ = json.Marshal(p)
 
-	resp.Result = &metav1.Status{
+	admResp.Result = &metav1.Status{
 		Status: "Success",
 	}
 
-	admReview.Response = &resp
+	admReview.Response = &admResp
 	// back into JSON so we can return the finished AdmissionReview w/ Response directly
 	// w/o needing to convert things in the http handler
 	if responseBody, err = json.Marshal(admReview); err != nil {
