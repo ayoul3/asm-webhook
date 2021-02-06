@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <testsuite name="ssm-webhook - Mutate" tests="2" failures="0" errors="0" time="0.007">
+      <testcase name="Mutate When the mutation succeed should change the image" classname="ssm-webhook - Mutate" time="0.00431089"></testcase>
+      <testcase name="Mutate When the mutation fails should return failure" classname="ssm-webhook - Mutate" time="0.000352652"></testcase>
+  </testsuite>
