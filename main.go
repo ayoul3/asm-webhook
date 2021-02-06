@@ -12,10 +12,12 @@ import (
 )
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request at root ...")
 	fmt.Fprintf(w, "hello %q", html.EscapeString(r.URL.Path))
 }
 
 func handleMutate(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received mutate request ...")
 	// read the body / request
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -26,12 +28,13 @@ func handleMutate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// mutate the request
+	log.Println("calling mutate method ...")
 	mutated, err := m.Mutate(body, true)
 	if err != nil {
 		sendError(err, w)
 		return
 	}
-
+	log.Println("Done ...")
 	// and write it back
 	w.WriteHeader(http.StatusOK)
 	w.Write(mutated)
@@ -44,7 +47,7 @@ func sendError(err error, w http.ResponseWriter) {
 }
 
 func main() {
-	log.Println("Starting server ...")
+	log.Println("Starting server1 ...")
 
 	mux := http.NewServeMux()
 

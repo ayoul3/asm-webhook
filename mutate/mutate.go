@@ -12,9 +12,7 @@ import (
 
 // Mutate mutates
 func Mutate(body []byte, verbose bool) ([]byte, error) {
-	if verbose {
-		log.Printf("recv: %s\n", string(body)) // untested section
-	}
+	log.Printf("recv: %s\n", string(body)) // untested section
 
 	// unmarshal request into AdmissionReview struct
 	admReview := v1beta1.AdmissionReview{}
@@ -74,9 +72,7 @@ func Mutate(body []byte, verbose bool) ([]byte, error) {
 		}
 	}
 
-	if verbose {
-		log.Printf("resp: %s\n", string(responseBody)) // untested section
-	}
+	log.Printf("resp: %s\n", string(responseBody)) // untested section
 
 	return responseBody, nil
 }

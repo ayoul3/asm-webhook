@@ -1,6 +1,6 @@
-FROM scratch
+FROM alpine
 WORKDIR /app
-COPY ssm-webhook .
+COPY ssm-webhook /app
 COPY ssl ssl
-COPY /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY ssl/ca-certificates.crt /etc/ssl/certs/
 CMD ["/app/ssm-webhook"]
