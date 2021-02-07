@@ -11,9 +11,12 @@ import (
 )
 
 type Mutator struct {
-	K8sClient kubernetes.Interface
-	Namespace string
-	Registry  registry.ImageRegistry
+	K8sClient  kubernetes.Interface
+	Namespace  string
+	Registry   registry.ImageRegistry
+	MountPath  string
+	BinaryName string
+	ASMConfig  ASMConfig
 }
 
 func CreateClient() *Mutator {
@@ -29,7 +32,20 @@ func CreateClient() *Mutator {
 		K8sClient: k8sClient,
 		Namespace: string(namespace),
 		Registry:  registry.NewRegistry(),
+		ASMConfig: ASMConfig{
+			ImageName:    "ayoul3/asm-env",
+			MountPath:    "/asm/",
+			OriginalPath: "/app/",
+			BinaryName:   "asm-env",
+		},
 	}
+}
+
+type ASMConfig struct {
+	ImageName    string
+	MountPath    string
+	OriginalPath string
+	BinaryName   string
 }
 
 func newK8SClient() (kubernetes.Interface, error) {

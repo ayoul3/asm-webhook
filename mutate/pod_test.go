@@ -19,13 +19,23 @@ func TestLib(t *testing.T) {
 	RunSpecsWithDefaultAndCustomReporters(t, "asm-webhook - pod", []Reporter{reporters.NewJUnitReporter("pod_report-lib.xml")})
 }
 
-var _ = Describe("MutatePod", func() {
-	m := mutate.Mutator{
+func createFakeMutator() mutate.Mutator {
+	return mutate.Mutator{
 		K8sClient: fake.NewSimpleClientset(),
 		Registry: &registry.MockRegistry{
 			Image: v1.Config{},
 		},
+		ASMConfig: mutate.ASMConfig{
+			ImageName:    "ayoul3/asm-env",
+			MountPath:    "/asm/",
+			OriginalPath: "/app/",
+			BinaryName:   "asm-env",
+		},
 	}
+}
+
+var _ = Describe("MutatePod", func() {
+	m := createFakeMutator()
 	Context("When the container has a one command and no args", func() {
 		It("should change the image", func() {
 			initialPod := &corev1.Pod{
