@@ -1,31 +1,42 @@
 package mutate
 
 import (
-	"context"
+	"io/ioutil"
 
 	log "github.com/sirupsen/logrus"
-	kwhmodel "github.com/slok/kubewebhook/v2/pkg/model"
-	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/ayoul3/asm-webhook/registry"
+	"k8s.io/client-go/kubernetes"
+	kubernetesConfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-func MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutating.MutatorResult, err error) {
-	for i, _ := range pod.Spec.Containers {
-		log.Info("replaced image")
-		pod.Spec.Containers[i].Image = "debian"
-	}
-	return &kwhmutating.MutatorResult{MutatedObject: pod}, nil
+type Mutator struct {
+	K8sClient kubernetes.Interface
+	Namespace string
+	Registry  registry.ImageRegistry
 }
 
-func SecretsMutator(ctx context.Context, _ *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
-	log.Info("here")
-	switch v := obj.(type) {
-	case *corev1.Pod:
-		log.Info("got pod")
-		return MutatePod(ctx, v)
-
-	default:
-		return &kwhmutating.MutatorResult{}, nil
+func CreateClient() *Mutator {
+	k8sClient, err := newK8SClient()
+	if err != nil {
+		log.Fatalf("error creating k8s client: %s", err)
 	}
+	namespace, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	if err != nil {
+		log.Fatalf("error reading k8s namespace: %s", err)
+	}
+	return &Mutator{
+		K8sClient: k8sClient,
+		Namespace: string(namespace),
+		Registry:  registry.NewRegistry(),
+	}
+}
+
+func newK8SClient() (kubernetes.Interface, error) {
+	kubeConfig, err := kubernetesConfig.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return kubernetes.NewForConfig(kubeConfig)
 }

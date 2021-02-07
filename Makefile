@@ -1,5 +1,5 @@
-NAME = ssm-webhook
-IMAGE_NAME = ssm-webhook
+NAME = asm-webhook
+IMAGE_NAME = asm-webhook
 IMAGE_PREFIX = ayoul3
 IMAGE_VERSION = $$(git log --abbrev-commit --format=%h -s | head -n 1)
 export GO111MODULE=on
@@ -8,7 +8,7 @@ test:
 	go test -v ./... -cover
 
 build:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ssm-webhook main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o asm-webhook main.go
 
 docker: build
 	#docker build --no-cache -t $(IMAGE_PREFIX)/$(IMAGE_NAME):$(IMAGE_VERSION) .

@@ -18,7 +18,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 
 func handlerFor(mutator kwhmutating.MutatorFunc, logger kwhlog.Logger) http.Handler {
 	webhook, err := kwhmutating.NewWebhook(kwhmutating.WebhookConfig{
-		ID:      "ssm-webhook",
+		ID:      "asm-webhook",
 		Mutator: mutator,
 		Logger:  logger,
 	})

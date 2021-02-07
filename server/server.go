@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ayoul3/ssm-webhook/mutate"
+	"github.com/ayoul3/asm-webhook/mutate"
 	log "github.com/sirupsen/logrus"
 	kwhlog "github.com/slok/kubewebhook/v2/pkg/log/logrus"
 	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
@@ -12,8 +12,10 @@ import (
 
 func Start() {
 	mux := http.NewServeMux()
-	logger := kwhlog.NewLogrus(log.WithField("app", "ssm-webhook"))
-	mutator := kwhmutating.MutatorFunc(mutate.SecretsMutator)
+	logger := kwhlog.NewLogrus(log.WithField("app", "asm-webhook"))
+	mutatorClient := mutate.CreateClient()
+
+	mutator := kwhmutating.MutatorFunc(mutatorClient.SecretsMutator)
 	podHandler := handlerFor(mutator, logger)
 
 	mux.HandleFunc("/", handleRoot)
