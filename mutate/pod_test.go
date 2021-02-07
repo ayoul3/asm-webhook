@@ -55,7 +55,42 @@ var _ = Describe("MutatePod", func() {
 			v, _ := resp.MutatedObject.(*corev1.Pod)
 			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
+			/*mystr, _ := json.Marshal(v)
+			fmt.Println(string(mystr))*/
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/bash"}))
+			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.InitContainers[0].Command[0]).To(Equal("sh"))
+			Expect(v.Spec.Volumes[0].Name).To(Equal(m.ASMConfig.BinaryName))
+		})
+	})
+	Context("When the init container has a secret", func() {
+		It("should change the image", func() {
+			initialPod := &corev1.Pod{
+				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{
+						{Image: "debian",
+							Env:     []corev1.EnvVar{{Name: "TEST1", Value: "arn:aws:secretsmanager:eu-west-1:886477354405:secret:/key1-mIdVIP"}},
+							Command: []string{"/bin/bash"},
+						},
+					},
+					Containers: []corev1.Container{
+						{Image: "nginx",
+							Env:     []corev1.EnvVar{{Name: "TEST2", Value: "arn:aws:secretsmanager:eu-west-1:886477354405:secret:/key1-mIdVIP"}},
+							Command: []string{"/bin/bash"},
+						},
+					},
+				},
+			}
+			resp, err := m.MutatePod(context.Background(), initialPod)
+			Expect(err).ToNot(HaveOccurred())
+			v, _ := resp.MutatedObject.(*corev1.Pod)
+			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
+			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.InitContainers[0].Command[0]).To(Equal("sh"))
+			Expect(v.Spec.InitContainers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.InitContainers[1].Command).To(Equal([]string{execPath}))
+			Expect(v.Spec.InitContainers[1].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
 		})
 	})
 	Context("When the container has a one command and multiple args", func() {
