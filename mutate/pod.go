@@ -14,24 +14,26 @@ import (
 func (m *Mutator) MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutating.MutatorResult, err error) {
 	// override command
 	// override entry point
-	var addInitContainer bool
+	var shouldMutate bool
 
 	for i, container := range pod.Spec.Containers {
 		var mutatedContainer *corev1.Container
 
-		if !m.ContainerHasSecrets(&container) {
+		if shouldMutate, err = m.ContainerHasSecrets(&container, pod.GetNamespace()); err != nil {
+			return res, errors.Wrapf(err, "ContainerHasSecrets -  %s", container.Name)
+		}
+		if !shouldMutate {
 			log.Debugf("No asm secrets in container: %s", container.Name)
 			continue
 		}
-		addInitContainer = true
 		if mutatedContainer, err = m.MutateContainer(ctx, &container, &pod.Spec, pod.GetNamespace()); err != nil {
 			log.Debugf("Error mutating container: %s", container.Name)
-			return res, errors.Wrapf(err, "MutateContainer - Error mutating container %s", container.Name)
+			return res, errors.Wrapf(err, "MutateContainer - container %s", container.Name)
 		}
 		pod.Spec.Containers[i] = *mutatedContainer
 	}
 
-	if addInitContainer {
+	if shouldMutate {
 
 	}
 	return &kwhmutating.MutatorResult{MutatedObject: pod}, nil

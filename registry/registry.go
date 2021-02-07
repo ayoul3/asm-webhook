@@ -38,6 +38,7 @@ type ImageRegistry interface {
 		namespace string,
 		container *corev1.Container,
 		podSpec *corev1.PodSpec) (*v1.Config, error)
+	WithImageConfig(name string, image *v1.Config)
 }
 
 // Registry impl
@@ -65,6 +66,10 @@ func IsAllowedToCache(container *corev1.Container) bool {
 	}
 
 	return reference.Identifier() != "latest"
+}
+
+func (r *Registry) WithImageConfig(name string, imageConfig *v1.Config) {
+	r.imageCache.Set(name, imageConfig, cache.DefaultExpiration)
 }
 
 // GetImageConfig returns entrypoint and command of container
