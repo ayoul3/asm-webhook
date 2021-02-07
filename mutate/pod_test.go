@@ -2,6 +2,7 @@ package mutate_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/ayoul3/asm-webhook/mutate"
@@ -52,7 +53,8 @@ var _ = Describe("MutatePod", func() {
 			resp, err := m.MutatePod(context.Background(), initialPod)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			Expect(v.Spec.Containers[0].Command).To(Equal([]string{"/asm/asm-env"}))
+			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/bash"}))
 		})
 	})
@@ -72,7 +74,8 @@ var _ = Describe("MutatePod", func() {
 			resp, err := m.MutatePod(context.Background(), initialPod)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			Expect(v.Spec.Containers[0].Command).To(Equal([]string{"/asm/asm-env"}))
+			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/python3", "script.py", "-c", "arg1"}))
 		})
 	})
@@ -93,7 +96,8 @@ var _ = Describe("MutatePod", func() {
 			resp, err := m.MutatePod(context.Background(), initialPod)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			Expect(v.Spec.Containers[0].Command).To(Equal([]string{"/asm/asm-env"}))
+			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/sh", "-c", "echo hello"}))
 		})
 	})
@@ -114,7 +118,8 @@ var _ = Describe("MutatePod", func() {
 			resp, err := m.MutatePod(context.Background(), initialPod)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			Expect(v.Spec.Containers[0].Command).To(Equal([]string{"/asm/asm-env"}))
+			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/sh", "-c", "echo bonjour"}))
 		})
 	})
