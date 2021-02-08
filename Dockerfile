@@ -1,7 +1,7 @@
 FROM alpine
 WORKDIR /app
 
-COPY ssm-webhook /app
+COPY asm-webhook /app
 COPY ssl ssl
 COPY ssl/ca-certificates.crt /etc/ssl/certs/
 
