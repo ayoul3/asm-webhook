@@ -13,6 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// MutatePod loops over every initContainer and container to mutate them if necessary
 func (m *Mutator) MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutating.MutatorResult, err error) {
 	var shouldMutate, shouldMutateInit bool
 	var containers []corev1.Container
@@ -37,6 +38,7 @@ func (m *Mutator) MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutat
 	return &kwhmutating.MutatorResult{MutatedObject: pod}, nil
 }
 
+// CreateInitContainer injects an initContainer that copies the asm-env binary to a shared mounted volume
 func (m *Mutator) CreateInitContainer() []corev1.Container {
 	var containers = []corev1.Container{}
 	originalPath := fmt.Sprintf("%s%s", m.ASMConfig.OriginalPath, m.ASMConfig.BinaryName)
@@ -63,6 +65,7 @@ func (m *Mutator) CreateInitContainer() []corev1.Container {
 	return containers
 }
 
+// CreateVolume creates the shared volume that receives asm-env binary
 func (m *Mutator) CreateVolume() []corev1.Volume {
 	volumes := []corev1.Volume{
 		{
@@ -78,8 +81,9 @@ func (m *Mutator) CreateVolume() []corev1.Volume {
 
 }
 
+// SecretsMutator receives the object to mutate and calls the right function according to its type
 func (m *Mutator) SecretsMutator(ctx context.Context, _ *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
-	log.Debugf(" SecretsMutator - Received object %s in namespace %s", obj.GetName(), obj.GetNamespace())
+	log.Debugf("SecretsMutator - Received object %s in namespace %s", obj.GetName(), obj.GetNamespace())
 	switch v := obj.(type) {
 	case *corev1.Pod:
 		log.Debugf("Got pod %s", v.GetName())
