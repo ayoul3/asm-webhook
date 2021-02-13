@@ -26,17 +26,17 @@ func createFakeMutator() mutate.Mutator {
 		Registry: &registry.MockRegistry{
 			Image: v1.Config{},
 		},
-		ASMConfig: mutate.ASMConfig{
-			ImageName:  "ayoul3/asm-env",
-			MountPath:  "/asm/",
-			BinPath:    "/app/",
-			BinaryName: "asm-env",
-		},
 	}
 }
 
 var _ = Describe("MutatePod", func() {
 	m := createFakeMutator()
+	config := mutate.ASMConfig{
+		ImageName:  "ayoul3/asm-env",
+		MountPath:  "/asm/",
+		BinPath:    "/app/",
+		BinaryName: "asm-env",
+	}
 	Context("When the container has a one command and no args", func() {
 		It("should change the image", func() {
 			initialPod := &corev1.Pod{
@@ -50,17 +50,17 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			/*mystr, _ := json.Marshal(v)
 			fmt.Println(string(mystr))*/
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/bash"}))
-			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(config.BinaryName))
 			Expect(v.Spec.InitContainers[0].Command[0]).To(Equal("sh"))
-			Expect(v.Spec.Volumes[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.Volumes[0].Name).To(Equal(config.BinaryName))
 		})
 	})
 	Context("When the init container has a secret", func() {
@@ -81,16 +81,16 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
-			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.Containers[0].VolumeMounts[0].Name).To(Equal(config.BinaryName))
 			Expect(v.Spec.InitContainers[0].Command[0]).To(Equal("sh"))
-			Expect(v.Spec.InitContainers[0].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.InitContainers[0].VolumeMounts[0].Name).To(Equal(config.BinaryName))
 			Expect(v.Spec.InitContainers[1].Command).To(Equal([]string{execPath}))
-			Expect(v.Spec.InitContainers[1].VolumeMounts[0].Name).To(Equal(m.ASMConfig.BinaryName))
+			Expect(v.Spec.InitContainers[1].VolumeMounts[0].Name).To(Equal(config.BinaryName))
 		})
 	})
 	Context("When the container has a one command and multiple args", func() {
@@ -106,10 +106,10 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/python3", "script.py", "-c", "arg1"}))
 		})
@@ -128,10 +128,10 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/sh", "-c", "echo hello"}))
 		})
@@ -150,10 +150,10 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
-			execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+			execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 			Expect(v.Spec.Containers[0].Command).To(Equal([]string{execPath}))
 			Expect(v.Spec.Containers[0].Args).To(Equal([]string{"/bin/sh", "-c", "echo bonjour"}))
 		})
@@ -167,7 +167,7 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			resp, err := m.MutatePod(context.Background(), initialPod)
+			resp, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).ToNot(HaveOccurred())
 			v, _ := resp.MutatedObject.(*corev1.Pod)
 			Expect(v).To(Equal(initialPod))
@@ -188,7 +188,7 @@ var _ = Describe("MutatePod", func() {
 					},
 				},
 			}
-			_, err := m.MutatePod(context.Background(), initialPod)
+			_, err := m.MutatePod(context.Background(), initialPod, config)
 			Expect(err).To(HaveOccurred())
 		})
 	})

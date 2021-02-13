@@ -18,13 +18,9 @@ import (
 )
 
 type Mutator struct {
-	K8sClient  kubernetes.Interface
-	Namespace  string
-	Registry   registry.ImageRegistry
-	MountPath  string
-	BinaryName string
-	ASMConfig  ASMConfig
-	Debug      bool
+	K8sClient kubernetes.Interface
+	Namespace string
+	Registry  registry.ImageRegistry
 }
 
 type ASMConfig struct {
@@ -32,6 +28,8 @@ type ASMConfig struct {
 	MountPath  string
 	BinPath    string
 	BinaryName string
+	Debug      bool
+	Log        *log.Logger
 }
 
 func CreateClient(fs afero.Fs) (*Mutator, error) {
@@ -50,12 +48,6 @@ func CreateClient(fs afero.Fs) (*Mutator, error) {
 		K8sClient: k8sClient,
 		Namespace: string(namespace),
 		Registry:  registry.NewRegistry(),
-		ASMConfig: ASMConfig{
-			ImageName:  "ayoul3/asm-env",
-			MountPath:  "/asm/",
-			BinPath:    "/app/",
-			BinaryName: "asm-env",
-		},
 	}, nil
 }
 
@@ -70,42 +62,51 @@ func newK8SClient() (kubernetes.Interface, error) {
 
 // SecretsMutator receives the object to mutate and calls the right function according to its type
 func (m *Mutator) SecretsMutator(ctx context.Context, _ *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
-	m.ParseConfig(obj)
+	asmConfig := m.ParseConfig(obj)
 
-	log.Debugf("SecretsMutator - Received object %s in namespace %s", obj.GetName(), obj.GetNamespace())
+	asmConfig.Log.Debugf("SecretsMutator - Received object %s in namespace %s", obj.GetName(), obj.GetNamespace())
 	switch v := obj.(type) {
 	case *corev1.Pod:
-		log.Debugf("Got pod %s", v.GetName())
-		return m.MutatePod(ctx, v)
+		asmConfig.Log.Debugf("Mutation request for pod %s", v.GetName())
+		return m.MutatePod(ctx, v, asmConfig)
 
 	default:
 		return &kwhmutating.MutatorResult{}, nil
 	}
 }
 
-func (m *Mutator) ParseConfig(obj metav1.Object) {
+func (m *Mutator) ParseConfig(obj metav1.Object) ASMConfig {
 	annotations := obj.GetAnnotations()
+	config := ASMConfig{
+		ImageName:  "ayoul3/asm-env",
+		MountPath:  "/asm/",
+		BinPath:    "/app/",
+		BinaryName: "asm-env",
+		Debug:      false,
+		Log:        log.New(),
+	}
 
 	if _, ok := annotations["asm.webhook.debug"]; ok {
-		log.SetLevel(log.DebugLevel)
-		m.Debug = true
+		config.Log.SetLevel(log.DebugLevel)
+		config.Debug = true
 	}
 	if val, ok := annotations["asm.webhook.asm-env.image"]; ok {
-		m.ASMConfig.ImageName = val
+		config.ImageName = val
 	}
 	if val, ok := annotations["asm.webhook.asm-env.path"]; ok {
-		m.ASMConfig.BinPath = val
+		config.BinPath = val
 	}
 	if val, ok := annotations["asm.webhook.asm-env.bin"]; ok {
-		m.ASMConfig.BinaryName = val
+		config.BinaryName = val
 	}
 	if val, ok := annotations["asm.webhook.asm-env.mountPath"]; ok {
-		m.ASMConfig.MountPath = val
+		config.MountPath = val
 	}
-	if !strings.HasSuffix(m.ASMConfig.BinPath, "/") {
-		m.ASMConfig.BinPath = m.ASMConfig.BinPath + "/"
+	if !strings.HasSuffix(config.BinPath, "/") {
+		config.BinPath = config.BinPath + "/"
 	}
-	if !strings.HasSuffix(m.ASMConfig.MountPath, "/") {
-		m.ASMConfig.MountPath = m.ASMConfig.MountPath + "/"
+	if !strings.HasSuffix(config.MountPath, "/") {
+		config.MountPath = config.MountPath + "/"
 	}
+	return config
 }

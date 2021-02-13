@@ -23,12 +23,12 @@ var _ = Describe("ParseConfig", func() {
 			"asm.webhook.asm-env.mountPath": "/new",
 		})
 		It("should return correct config", func() {
-			m.ParseConfig(obj)
-			Expect(m.Debug).To(Equal(true))
-			Expect(m.ASMConfig.ImageName).To(Equal("special-image:latest"))
-			Expect(m.ASMConfig.BinaryName).To(Equal("newBinary"))
-			Expect(m.ASMConfig.MountPath).To(Equal("/new/"))
-			Expect(m.ASMConfig.BinPath).To(Equal("/bin/"))
+			config := m.ParseConfig(obj)
+			Expect(config.Debug).To(Equal(true))
+			Expect(config.ImageName).To(Equal("special-image:latest"))
+			Expect(config.BinaryName).To(Equal("newBinary"))
+			Expect(config.MountPath).To(Equal("/new/"))
+			Expect(config.BinPath).To(Equal("/bin/"))
 		})
 	})
 

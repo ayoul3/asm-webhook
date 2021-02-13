@@ -6,7 +6,6 @@ import (
 
 	"emperror.dev/errors"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -37,7 +36,7 @@ func (m *Mutator) ContainerHasSecrets(container *corev1.Container, ns string) (h
 	return false, nil
 }
 
-func (m *Mutator) MutateContainers(ctx context.Context, containers []corev1.Container, pod *corev1.Pod) (out []corev1.Container, shouldMutate bool, err error) {
+func (m *Mutator) MutateContainers(ctx context.Context, containers []corev1.Container, pod *corev1.Pod, config ASMConfig) (out []corev1.Container, shouldMutate bool, err error) {
 	for i, container := range containers {
 		var mutatedContainer *corev1.Container
 
@@ -45,41 +44,44 @@ func (m *Mutator) MutateContainers(ctx context.Context, containers []corev1.Cont
 			return containers, false, errors.Wrapf(err, "ContainerHasSecrets -  %s", container.Name)
 		}
 		if !shouldMutate {
-			log.Debugf("No asm secrets in container: %s", container.Name)
+			config.Log.Debugf("No asm secrets in container: %s", container.Name)
 			continue
 		}
-		if mutatedContainer, err = m.MutateSingleContainer(ctx, &container, &pod.Spec, pod.GetNamespace()); err != nil {
-			log.Debugf("Error mutating container: %s", container.Name)
+		config.Log.Debugf("Will mutate container %s", container.Name)
+		if mutatedContainer, err = m.MutateSingleContainer(ctx, &container, &pod.Spec, config, pod.GetNamespace()); err != nil {
+			config.Log.Warnf("Error mutating container: %s", container.Name)
 			return containers, false, errors.Wrapf(err, "MutateSingleContainer - container %s", container.Name)
 		}
 		containers[i] = *mutatedContainer
 	}
-	return containers, true, nil
+	return containers, shouldMutate, nil
 }
 
-func (m *Mutator) MutateSingleContainer(ctx context.Context, container *corev1.Container, podSpec *corev1.PodSpec, ns string) (new *corev1.Container, err error) {
+func (m *Mutator) MutateSingleContainer(ctx context.Context, container *corev1.Container, podSpec *corev1.PodSpec, config ASMConfig, ns string) (new *corev1.Container, err error) {
 	var imageArgs []string
 	args := container.Command
 	if len(args) == 0 {
+		config.Log.Debugf("No commands found in Container spec. Will fetch it from registry")
 		if imageArgs, err = m.ExtractArgsFromImageConfig(ctx, container, podSpec, ns); err != nil {
 			return container, errors.Wrapf(err, "ExtractArgsFromImageConfig - error for %s ", container.Name)
 		}
+		config.Log.Debugf("Got image config from Kube: %s", imageArgs)
 		args = append(args, imageArgs...)
 	}
 
 	args = append(args, container.Args...)
 
-	execPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
+	execPath := fmt.Sprintf("%s%s", config.MountPath, config.BinaryName)
 	container.Command = []string{execPath}
 	container.Args = args
 
 	container.VolumeMounts = append(container.VolumeMounts, []corev1.VolumeMount{
 		{
-			Name:      m.ASMConfig.BinaryName,
-			MountPath: m.ASMConfig.MountPath,
+			Name:      config.BinaryName,
+			MountPath: config.MountPath,
 		},
 	}...)
-	if m.Debug {
+	if config.Debug {
 		container.Env = append(container.Env, corev1.EnvVar{
 			Name:  "ASM_DEBUG",
 			Value: "true",
@@ -96,7 +98,6 @@ func (m *Mutator) ExtractArgsFromImageConfig(ctx context.Context, container *cor
 	if imageConfig, err = m.Registry.GetImageConfig(ctx, m.K8sClient, ns, container, podSpec); err != nil {
 		return args, errors.Wrap(err, "GetImageConfig - ")
 	}
-	log.Debugf("Got image config from Kube: Entrypoint: %s, Cmd: %s", imageConfig.Entrypoint, imageConfig.Cmd)
 	args = append(args, imageConfig.Entrypoint...)
 	if len(container.Args) == 0 {
 		args = append(args, imageConfig.Cmd...)
