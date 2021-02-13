@@ -8,12 +8,16 @@ import (
 	log "github.com/sirupsen/logrus"
 	kwhlog "github.com/slok/kubewebhook/v2/pkg/log/logrus"
 	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
+	"github.com/spf13/afero"
 )
 
 func Start() {
 	mux := http.NewServeMux()
 	logger := kwhlog.NewLogrus(log.WithField("app", "asm-webhook"))
-	mutatorClient := mutate.CreateClient()
+	mutatorClient, err := mutate.CreateClient(afero.NewOsFs())
+	if err != nil {
+		log.Fatalf("Cannot create mutator client: %s", err)
+	}
 
 	mutator := kwhmutating.MutatorFunc(mutatorClient.SecretsMutator)
 	podHandler := handlerFor(mutator, logger)

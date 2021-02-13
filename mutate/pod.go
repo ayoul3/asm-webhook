@@ -6,11 +6,9 @@ import (
 
 	"emperror.dev/errors"
 	log "github.com/sirupsen/logrus"
-	kwhmodel "github.com/slok/kubewebhook/v2/pkg/model"
 	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MutatePod loops over every initContainer and container to mutate them if necessary
@@ -41,9 +39,14 @@ func (m *Mutator) MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutat
 // CreateInitContainer injects an initContainer that copies the asm-env binary to a shared mounted volume
 func (m *Mutator) CreateInitContainer() []corev1.Container {
 	var containers = []corev1.Container{}
-	originalPath := fmt.Sprintf("%s%s", m.ASMConfig.OriginalPath, m.ASMConfig.BinaryName)
+	var env = []corev1.EnvVar{}
+
+	BinPath := fmt.Sprintf("%s%s", m.ASMConfig.BinPath, m.ASMConfig.BinaryName)
 	newPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
-	cmd := fmt.Sprintf("cp %s %s && chmod +x %s", originalPath, newPath, newPath)
+	cmd := fmt.Sprintf("cp %s %s && chmod +x %s", BinPath, newPath, newPath)
+	if m.Debug {
+		env = []corev1.EnvVar{{Name: "ASM_ENV_DEBUG", Value: "true"}}
+	}
 	containers = append(containers, corev1.Container{
 		Name:            "copy-asm-binary",
 		Image:           m.ASMConfig.ImageName,
@@ -55,6 +58,7 @@ func (m *Mutator) CreateInitContainer() []corev1.Container {
 				corev1.ResourceMemory: resource.MustParse("64Mi"),
 			},
 		},
+		Env: env,
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      m.ASMConfig.BinaryName,
@@ -79,17 +83,4 @@ func (m *Mutator) CreateVolume() []corev1.Volume {
 	}
 	return volumes
 
-}
-
-// SecretsMutator receives the object to mutate and calls the right function according to its type
-func (m *Mutator) SecretsMutator(ctx context.Context, _ *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
-	log.Debugf("SecretsMutator - Received object %s in namespace %s", obj.GetName(), obj.GetNamespace())
-	switch v := obj.(type) {
-	case *corev1.Pod:
-		log.Debugf("Got pod %s", v.GetName())
-		return m.MutatePod(ctx, v)
-
-	default:
-		return &kwhmutating.MutatorResult{}, nil
-	}
 }

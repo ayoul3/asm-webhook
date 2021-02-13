@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"html"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -13,7 +12,7 @@ import (
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Received request at root ...")
-	fmt.Fprintf(w, "hello %q", html.EscapeString(r.URL.Path))
+	fmt.Fprint(w, "Welcome to asm-webhook mutator")
 }
 
 func handlerFor(mutator kwhmutating.MutatorFunc, logger kwhlog.Logger) http.Handler {

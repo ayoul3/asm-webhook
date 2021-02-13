@@ -17,7 +17,7 @@ import (
 
 func TestLib(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t, "asm-webhook - pod", []Reporter{reporters.NewJUnitReporter("pod_report-lib.xml")})
+	RunSpecsWithDefaultAndCustomReporters(t, "asm-webhook - mutate", []Reporter{reporters.NewJUnitReporter("mutate_report-lib.xml")})
 }
 
 func createFakeMutator() mutate.Mutator {
@@ -27,10 +27,10 @@ func createFakeMutator() mutate.Mutator {
 			Image: v1.Config{},
 		},
 		ASMConfig: mutate.ASMConfig{
-			ImageName:    "ayoul3/asm-env",
-			MountPath:    "/asm/",
-			OriginalPath: "/app/",
-			BinaryName:   "asm-env",
+			ImageName:  "ayoul3/asm-env",
+			MountPath:  "/asm/",
+			BinPath:    "/app/",
+			BinaryName: "asm-env",
 		},
 	}
 }
