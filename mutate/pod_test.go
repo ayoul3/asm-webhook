@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	fake "k8s.io/client-go/kubernetes/fake"
 )
@@ -36,6 +37,7 @@ var _ = Describe("MutatePod", func() {
 		MountPath:  "/asm/",
 		BinPath:    "/app/",
 		BinaryName: "asm-env",
+		Log:        logrus.New(),
 	}
 	Context("When the container has a one command and no args", func() {
 		It("should change the image", func() {
