@@ -1,8 +1,9 @@
 FROM alpine
 WORKDIR /app
 
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
 COPY asm-webhook /app
 COPY ssl ssl
-COPY ssl/ca-certificates.crt /etc/ssl/certs/
 
 CMD ["/app/asm-webhook"]
