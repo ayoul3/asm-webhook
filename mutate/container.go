@@ -79,6 +79,13 @@ func (m *Mutator) MutateSingleContainer(ctx context.Context, container *corev1.C
 			MountPath: m.ASMConfig.MountPath,
 		},
 	}...)
+	if m.Debug {
+		container.Env = append(container.Env, corev1.EnvVar{
+			Name:  "ASM_DEBUG",
+			Value: "true",
+		})
+	}
+
 	return container, nil
 }
 

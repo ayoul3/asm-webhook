@@ -39,14 +39,10 @@ func (m *Mutator) MutatePod(ctx context.Context, pod *corev1.Pod) (res *kwhmutat
 // CreateInitContainer injects an initContainer that copies the asm-env binary to a shared mounted volume
 func (m *Mutator) CreateInitContainer() []corev1.Container {
 	var containers = []corev1.Container{}
-	var env = []corev1.EnvVar{}
 
 	BinPath := fmt.Sprintf("%s%s", m.ASMConfig.BinPath, m.ASMConfig.BinaryName)
 	newPath := fmt.Sprintf("%s%s", m.ASMConfig.MountPath, m.ASMConfig.BinaryName)
 	cmd := fmt.Sprintf("cp %s %s && chmod +x %s", BinPath, newPath, newPath)
-	if m.Debug {
-		env = []corev1.EnvVar{{Name: "ASM_ENV_DEBUG", Value: "true"}}
-	}
 	containers = append(containers, corev1.Container{
 		Name:            "copy-asm-binary",
 		Image:           m.ASMConfig.ImageName,
@@ -58,7 +54,6 @@ func (m *Mutator) CreateInitContainer() []corev1.Container {
 				corev1.ResourceMemory: resource.MustParse("64Mi"),
 			},
 		},
-		Env: env,
 		VolumeMounts: []corev1.VolumeMount{
 			{
 				Name:      m.ASMConfig.BinaryName,
