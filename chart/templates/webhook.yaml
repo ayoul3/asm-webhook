@@ -1,0 +1,34 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ printf "%s.%s.svc" .Values.fullname .Values.namespace }}
+  {{- with .Values.webhookLabels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  namespace: {{ .Values.namespace }}
+webhooks:
+  - name: {{ printf "%s.%s.svc" .Values.fullname .Values.namespace }}
+    matchPolicy: Equivalent
+    objectSelector:
+      {{- with .Values.webhookSelectorLabels }}
+      matchLabels:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    clientConfig:
+      caBundle: {{.Values.caBundle }}
+      service:
+        name: {{ .Values.serviceAccountName }}
+        namespace: {{ .Values.namespace }}
+        path: "/mutate"
+        port: 443
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5
+    reinvocationPolicy: Never
+    failurePolicy: Fail

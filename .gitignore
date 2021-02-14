@@ -1,6 +1,14 @@
 *
 !.gitignore
 !*.go
+!*.yaml
 !mutate
 !registry
 !server
+!chart
+!chart/templates
+!.github
+!.github/workflows
+
+
+chart/templates/app-certs.yaml

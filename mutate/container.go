@@ -81,12 +81,8 @@ func (m *Mutator) MutateSingleContainer(ctx context.Context, container *corev1.C
 			MountPath: config.MountPath,
 		},
 	}...)
-	if config.Debug {
-		container.Env = append(container.Env, corev1.EnvVar{
-			Name:  "ASM_DEBUG",
-			Value: "true",
-		})
-	}
+
+	container.Env = append(container.Env, getEnvVarsFroMConfig(config)...)
 
 	return container, nil
 }
@@ -103,4 +99,20 @@ func (m *Mutator) ExtractArgsFromImageConfig(ctx context.Context, container *cor
 		args = append(args, imageConfig.Cmd...)
 	}
 	return args, nil
+}
+
+func getEnvVarsFroMConfig(config ASMConfig) (envs []corev1.EnvVar) {
+	if config.Debug {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "ASM_DEBUG",
+			Value: "true",
+		})
+	}
+	if config.SkipCertCheck {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "ASM_SKIP_SSL",
+			Value: "true",
+		})
+	}
+	return envs
 }

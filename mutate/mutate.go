@@ -24,12 +24,13 @@ type Mutator struct {
 }
 
 type ASMConfig struct {
-	ImageName  string
-	MountPath  string
-	BinPath    string
-	BinaryName string
-	Debug      bool
-	Log        *log.Logger
+	ImageName     string
+	MountPath     string
+	BinPath       string
+	BinaryName    string
+	Debug         bool
+	SkipCertCheck bool
+	Log           *log.Logger
 }
 
 func CreateClient(fs afero.Fs) (*Mutator, error) {
@@ -78,15 +79,16 @@ func (m *Mutator) SecretsMutator(ctx context.Context, _ *kwhmodel.AdmissionRevie
 func (m *Mutator) ParseConfig(obj metav1.Object) ASMConfig {
 	annotations := obj.GetAnnotations()
 	config := ASMConfig{
-		ImageName:  "ayoul3/asm-env",
-		MountPath:  "/asm/",
-		BinPath:    "/app/",
-		BinaryName: "asm-env",
-		Debug:      false,
-		Log:        log.New(),
+		ImageName:     "ayoul3/asm-env",
+		MountPath:     "/asm/",
+		BinPath:       "/app/",
+		BinaryName:    "asm-env",
+		Debug:         false,
+		SkipCertCheck: false,
+		Log:           log.New(),
 	}
 
-	if _, ok := annotations["asm.webhook.debug"]; ok {
+	if val, _ := annotations["asm.webhook.debug"]; val == "true" {
 		config.Log.SetLevel(log.DebugLevel)
 		config.Debug = true
 	}
@@ -101,6 +103,9 @@ func (m *Mutator) ParseConfig(obj metav1.Object) ASMConfig {
 	}
 	if val, ok := annotations["asm.webhook.asm-env.mountPath"]; ok {
 		config.MountPath = val
+	}
+	if val, _ := annotations["asm.webhook.asm-env.skip-cert-check"]; val == "true" {
+		config.SkipCertCheck = true
 	}
 	if !strings.HasSuffix(config.BinPath, "/") {
 		config.BinPath = config.BinPath + "/"
