@@ -9,7 +9,7 @@ metadata:
   annotations:
     asm.webhook.debug: "true"
 spec:
-  serviceAccountName: name # account mapped to a role that can fetch a secret in KEY_ID env var
+  serviceAccountName: webserver-service-account # account mapped to a role that can fetch a secret in KEY_ID env var
   containers:
   - name: asm-sample-pod
     image: alpine

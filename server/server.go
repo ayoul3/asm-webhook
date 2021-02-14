@@ -42,5 +42,6 @@ func Start(tlsCrt, tlsKey string) {
 		WriteTimeout:   5 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 1048576
 	}
+	log.Info("asm-webhook initialised")
 	log.Fatal(s.ListenAndServeTLS(tlsCrt, tlsKey))
 }

@@ -95,8 +95,12 @@ decrypted value password
 
 It is the pod that fetches its own secrets, so obviously it needs to use a service account mapped to an IAM role capable of reading such secrets. You can read more about it [here](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html) and find an actual example [here](https://aws.amazon.com/blogs/containers/aws-secrets-controller-poc/).
 
-The webhook needs a service account capable of getting container manifest from the registry you're using.  If you are using ECR, grant read-only access to the role mapped to the service account `webhook`.
+The webhook needs a service account capable of getting container manifest from the registry hosting the container image.  This capability is only used when the submitted container lacks the `command` argument.
+
+If you are using ECR, grant read-only access to the role mapped to the service account `webhook`.
 The default `AmazonEC2ContainerRegistryReadOnly` works just fine.
+
+You can put any value if you only use public images, or you always specify the command argument for your containers.
 
 
 ## Secret formats

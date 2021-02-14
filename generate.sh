@@ -95,7 +95,7 @@ echo "Fetching certificate authority from Kube cluster"
 
 CA_BUNDLE=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}')
 [ -z $CA_BUNDLE ] && echo "Empty CA_BUNDLE" && exit -1
-sed -Ei "s/caBundle:.+/caBundle: ${CA_BUNDLE}/" ./chart/values.yaml
+sed -Ei "s/caBundle:.*/caBundle: ${CA_BUNDLE}/" ./chart/values.yaml
 
 # Clean
 echo 0 > server-key.pem

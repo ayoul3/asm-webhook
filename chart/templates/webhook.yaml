@@ -16,7 +16,7 @@ webhooks:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     clientConfig:
-      caBundle: {{.Values.caBundle }}
+      caBundle: {{ required "caBundle is required. run generate.sh script" .Values.caBundle }}
       service:
         name: {{ .Values.fullname }}
         namespace: {{ .Values.namespace }}
