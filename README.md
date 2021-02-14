@@ -139,3 +139,6 @@ The webhook exposes Prometheus metrics on `/metrics`. A [grafana dashboard](http
 ## Credit
 [Banzai Vaults](https://github.com/banzaicloud/bank-vaults/tree/master/charts/vault-secrets-webhook)
 [Kubewebhook](https://github.com/slok/kubewebhook)
+
+## Author
+Ayoub Elaassal
