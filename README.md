@@ -26,7 +26,7 @@ The command of the container is overwritten so that its fist starts a binary `as
 ```yaml
 Command: sh
 Args:
- -c
+ - -c
  - trap 'exit' TERM; while :; do sleep 1; echo decrypted $KEY_ID; done
 ```
 becomes:
@@ -34,7 +34,7 @@ becomes:
 Command: /asm/asm-env
 Args:
  - sh
- -c
+ - -c
  - trap 'exit' TERM; while :; do sleep 1; echo decrypted $KEY_ID; done
 ```
 
@@ -67,6 +67,24 @@ $ k get deployments
 NAME          READY   UP-TO-DATE   AVAILABLE   AGE
 asm-webhook   1/1     1            1           17s
 ...snip...
+```
+
+## Test
+To test that your installation succeeded, try submitting the sample pod in the sample folder.
+First change the serviceaccount and the secret's ID to match your setup.
+```
+$ kubectl deploy -f sample/pod.yaml -n default
+pod "asm-sample-pod" created
+
+$ kubectl logs asm-sample-pod
+
+time="2021-02-14T13:39:45Z" level=debug msg="Preparing env variables"
+time="2021-02-14T13:39:45Z" level=debug msg="Decrypting key ID arn:aws:secretsmanager:eu-west-1:111111111111:secret:/key1-mIdVIP#password"
+time="2021-02-14T13:39:45Z" level=debug msg="Setting secret value in env var KEY_ID"
+time="2021-02-14T13:39:45Z" level=debug msg="Looking for nested key password in secret arn:aws:secretsmanager:eu-west-1:111111111111:secret:/key1-mIdVIP#password"
+time="2021-02-14T13:39:45Z" level=debug msg="Found nested key password in secret arn:aws:secretsmanager:eu-west-1:111111111111:secret:/key1-mIdVIP#password"
+time="2021-02-14T13:39:45Z" level=debug msg="Found absolute path /bin/sh"
+decrypted value password
 ```
 
 ## Prerequisites

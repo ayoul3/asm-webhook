@@ -10,6 +10,7 @@
 !.github
 !.github/workflows
 !generate.sh
+!sample
 !README.md
 
 
