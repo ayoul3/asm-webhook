@@ -42,7 +42,7 @@ Args:
 Default values work just fine if you want to test on minikube.
 
 On an EKS cluster change at least the roleArn in `./chart/values.yaml` to point to an IAM role capable of pulling ECR images:
-```
+```yaml
 serviceAccountName: webhook
 roleArn: "arn:aws:iam::1111111111111:role/webhook"
 ```
@@ -76,7 +76,7 @@ asm-webhook   1/1     1            1           17s
 ## Test
 To test that your installation succeeded, try submitting the sample pod in the sample folder.
 **First change the serviceaccount and the secret's ID to match your setup.**
-```
+```bash
 $ kubectl deploy -f sample/pod.yaml -n default
 pod "asm-sample-pod" created
 
