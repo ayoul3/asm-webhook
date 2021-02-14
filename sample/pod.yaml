@@ -20,4 +20,4 @@ spec:
       - trap "exit" TERM; while :; do sleep 1; echo decrypted value $KEY_ID; done
     env:
     - name: KEY_ID
-      value: <secretsmanager_arn>
+      value: <secretsmanager_arn> # ARN of a secret
