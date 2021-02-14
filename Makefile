@@ -11,7 +11,7 @@ test:
 build:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(BUILD) -o asm-webhook main.go
 
-docker: build
+docker:
 	docker build --no-cache -t $(IMAGE_PREFIX)/$(IMAGE_NAME):latest .
 
 push: docker
