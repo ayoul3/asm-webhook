@@ -33,8 +33,8 @@ func Start(tlsCrt, tlsKey string) {
 	s := &http.Server{
 		Addr:           ":8443",
 		Handler:        mux,
-		ReadTimeout:    2 * time.Second,
-		WriteTimeout:   2 * time.Second,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   5 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 1048576
 	}
 	log.Fatal(s.ListenAndServeTLS(tlsCrt, tlsKey))
