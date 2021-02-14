@@ -40,7 +40,7 @@ kubectl delete csr ${WEBHOOK_SVC} 2>/dev/null || true
 echo "Creating cert/key CSR in Kube"
 
 cat <<EOF | kubectl create -f -
-apiVersion: certificates.k8s.io/v1
+apiVersion: certificates.k8s.io/v1beta1
 kind: CertificateSigningRequest
 metadata:
   name: ${WEBHOOK_SVC}

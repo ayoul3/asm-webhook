@@ -18,7 +18,7 @@ webhooks:
     clientConfig:
       caBundle: {{.Values.caBundle }}
       service:
-        name: {{ .Values.serviceAccountName }}
+        name: {{ .Values.fullname }}
         namespace: {{ .Values.namespace }}
         path: "/mutate"
         port: 443

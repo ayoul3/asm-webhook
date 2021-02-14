@@ -41,14 +41,18 @@ Args:
 ## Install
 Default values work just fine if you want to test on minikube.
 
-You can always change values in `./chart/values.yaml` to match your naming convention, namespace, labels and so on.
+On an EKS cluster change at least the roleArn in `./chart/values.yaml` to point to an IAM role capable of pulling ECR images:
+```
+serviceAccountName: webhook
+roleArn: "arn:aws:iam::1111111111111:role/webhook"
+```
 
-Once you're done execute the `generate.sh` script to provision certificates used by the webhook:
+Once you're done, execute the `generate.sh` script to provision certificates used by the webhook:
 
 ```bash
 ./generate.sh
 ```
-This will gnerate a `secret` resource in Kube that will be mounted and used by the Webhook.
+This command will prepare certificates and store them a `secret` resource in Kube that will be mounted and used by the Webhook.
 
 If everything goes alright, you can then deploy the chart using helm:
 ```bash
@@ -71,7 +75,7 @@ asm-webhook   1/1     1            1           17s
 
 ## Test
 To test that your installation succeeded, try submitting the sample pod in the sample folder.
-First change the serviceaccount and the secret's ID to match your setup.
+**First change the serviceaccount and the secret's ID to match your setup.**
 ```
 $ kubectl deploy -f sample/pod.yaml -n default
 pod "asm-sample-pod" created
@@ -90,6 +94,10 @@ decrypted value password
 ## Prerequisites
 
 It is the pod that fetches its own secrets, so obviously it needs to use a service account mapped to an IAM role capable of reading such secrets. You can read more about it [here](https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html) and find an actual example [here](https://aws.amazon.com/blogs/containers/aws-secrets-controller-poc/).
+
+The webhook needs a service account capable of getting container manifest from the registry you're using.  If you are using ECR, grant read-only access to the role mapped to the service account `webhook`.
+The default `AmazonEC2ContainerRegistryReadOnly` works just fine.
+
 
 ## Secret formats
 Secrets stored in SecretsManager can be of two formats:
