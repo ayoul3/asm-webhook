@@ -1,7 +1,20 @@
 # ASM Webhook
-![Build](https://github.com/ayoul3/asm-webhook/workflows/Go/badge.svg)
-![Release](https://img.shields.io/github/v/release/ayoul3/asm-webhook)
-![Build](https://img.shields.io/docker/automated/ayoul3/asm-webhook)
+
+<p align="center">
+
+  <a href="#">
+    <img src="https://github.com/ayoul3/asm-webhook/workflows/Go/badge.svg" alt="Github tests">
+  </a>
+
+  <a target="_blank" href="https://github.com/ayoul3/asm-webhook/releases">
+    <img src="https://img.shields.io/github/v/release/ayoul3/asm-webhook" alt="Build release">
+  </a>
+
+  <a target="_blank" href="https://hub.docker.com/repository/docker/ayoul3/asm-webhook">
+    <img src="https://img.shields.io/docker/automated/ayoul3/asm-webhook" alt="GoDoc">
+  </a>
+
+</p>
 
 asm-webhook is a mutating Webhook designed to dynamically fetch secrets from SecretsManager and inject them as env variables in pods.
 
