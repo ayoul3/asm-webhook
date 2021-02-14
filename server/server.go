@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func Start() {
+func Start(tlsCrt, tlsKey string) {
 	mux := http.NewServeMux()
 	logger := kwhlog.NewLogrus(log.WithField("app", "asm-webhook"))
 	mutatorClient, err := mutate.CreateClient(afero.NewOsFs())
@@ -37,5 +37,5 @@ func Start() {
 		WriteTimeout:   2 * time.Second,
 		MaxHeaderBytes: 1 << 20, // 1048576
 	}
-	log.Fatal(s.ListenAndServeTLS("./ssl/server.crt", "./ssl/key.pem"))
+	log.Fatal(s.ListenAndServeTLS(tlsCrt, tlsKey))
 }
