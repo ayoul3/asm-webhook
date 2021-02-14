@@ -12,6 +12,7 @@
 !generate.sh
 !sample
 !README.md
+!LICENCE
 
 
 chart/templates/app-certs.yaml
