@@ -33,11 +33,7 @@ type ASMConfig struct {
 	Log           *log.Logger
 }
 
-func CreateClient(fs afero.Fs) (*Mutator, error) {
-	k8sClient, err := newK8SClient()
-	if err != nil {
-		return nil, errors.Wrapf(err, "newK8SClient ")
-	}
+func CreateClient(k8sClient kubernetes.Interface, fs afero.Fs) (*Mutator, error) {
 	namespace, err := afero.ReadFile(fs, "/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {
 		return nil, errors.Wrapf(err, "ReadFile namespace:  ")
@@ -52,7 +48,7 @@ func CreateClient(fs afero.Fs) (*Mutator, error) {
 	}, nil
 }
 
-func newK8SClient() (kubernetes.Interface, error) {
+func NewK8SClient() (kubernetes.Interface, error) {
 	kubeConfig, err := kubernetesConfig.GetConfig()
 	if err != nil {
 		return nil, err

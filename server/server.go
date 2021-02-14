@@ -17,10 +17,15 @@ import (
 func Start(tlsCrt, tlsKey string) {
 	mux := http.NewServeMux()
 	logger := kwhlog.NewLogrus(log.WithField("app", "asm-webhook"))
-	mutatorClient, err := mutate.CreateClient(afero.NewOsFs())
+	k8sClient, err := mutate.NewK8SClient()
+	if err != nil {
+		log.Fatalf("Cannot create k8s client: %s", err)
+	}
+	mutatorClient, err := mutate.CreateClient(k8sClient, afero.NewOsFs())
 	if err != nil {
 		log.Fatalf("Cannot create mutator client: %s", err)
 	}
+
 	mutator := kwhmutating.MutatorFunc(mutatorClient.SecretsMutator)
 	metricsRec, err := kwhprometheus.NewRecorder(kwhprometheus.RecorderConfig{Registry: prometheus.DefaultRegisterer})
 

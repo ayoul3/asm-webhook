@@ -34,9 +34,10 @@ var _ = Describe("ParseConfig", func() {
 
 })
 var _ = Describe("CreateClient", func() {
+	k8sClient := fake.NewSimpleClientset()
 	Context("When failure to fetch namespace", func() {
 		It("should return correct config", func() {
-			_, err := mutate.CreateClient(afero.NewMemMapFs())
+			_, err := mutate.CreateClient(k8sClient, afero.NewMemMapFs())
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -44,7 +45,7 @@ var _ = Describe("CreateClient", func() {
 		It("should return no error", func() {
 			fs := afero.NewMemMapFs()
 			fs.Create("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
-			_, err := mutate.CreateClient(fs)
+			_, err := mutate.CreateClient(k8sClient, fs)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
