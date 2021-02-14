@@ -1,7 +1,7 @@
 # ASM Webhook
 ![Build](https://github.com/ayoul3/asm-webhook/workflows/Go/badge.svg)
 
-asm-webhook is a mutating Webhook designed to dynamically fetch secrets from SecretsManager and inject them as env varibales in pods.
+asm-webhook is a mutating Webhook designed to dynamically fetch secrets from SecretsManager and inject them as env variables in pods.
 
 It is heavily inspired from the great [Banzai Vaults](https://github.com/banzaicloud/bank-vaults/tree/master/charts/vault-secrets-webhook) that only supports Vault.
 
@@ -20,7 +20,7 @@ An init container `ayoul3/asm-env` is injected which copies its main binary `asm
 
 4. Execution
 
-The command of the container is overwritten so that its fist starts a binary `asm-env` that will decrypt SecretsManager secrets. After which it will start the original command with its arguments.
+The command of the container is overwritten so that it first starts a binary `asm-env` that will decrypt SecretsManager secrets. After which it will start the original command with its arguments.
 
 
 ```yaml
