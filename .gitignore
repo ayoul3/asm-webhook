@@ -9,6 +9,8 @@
 !chart/templates
 !.github
 !.github/workflows
+!generate.sh
+!README.md
 
 
 chart/templates/app-certs.yaml
