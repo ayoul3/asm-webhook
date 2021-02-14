@@ -113,7 +113,7 @@ func getImageConfig(ctx context.Context, client kubernetes.Interface, container 
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "k8schain Auth - ")
 	}
 
 	options := []remote.Option{
@@ -129,22 +129,22 @@ func getImageConfig(ctx context.Context, client kubernetes.Interface, container 
 
 	ref, err := name.ParseReference(container.Image)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse image reference")
+		return nil, errors.Wrap(err, "ParseReference ")
 	}
 
 	descriptor, err := remote.Get(ref, options...)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot fetch image descriptor")
+		return nil, errors.Wrap(err, "Remote.get cannot fetch image descriptor")
 	}
 
 	image, err := descriptor.Image()
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot convert image descriptor to v1.Image")
+		return nil, errors.Wrap(err, "descriptor.Image cannot convert image descriptor to v1.Image")
 	}
 
 	configFile, err := image.ConfigFile()
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot extract config file of image")
+		return nil, errors.Wrap(err, "image.ConfigFile cannot extract config file of image")
 	}
 
 	return &configFile.Config, nil
