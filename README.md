@@ -54,9 +54,8 @@ Args:
 ```
 
 ## Install
-Default values work just fine if you want to test on minikube.
-
-On an EKS cluster change at least the roleArn in `./chart/values.yaml` to point to an IAM role capable of pulling ECR images:
+Most default values work just fine if you want to test on minikube.
+On an EKS cluster change at least the roleArn in `./chart/values.yaml` to point to an IAM role **capable of pulling ECR images**:
 ```yaml
 serviceAccountName: webhook
 roleArn: "arn:aws:iam::1111111111111:role/webhook"
@@ -88,6 +87,8 @@ asm-webhook   1/1     1            1           17s
 ...snip...
 ```
 
+Try deploying [pod.yaml](./sample/pod.yaml) file to test your webhook. Make sure to put in a proper secret ARN.
+
 ## Test
 To test that your installation succeeded, try submitting the sample pod in the sample folder.
 **First change the serviceaccount and the secret's ID to match your setup.**
@@ -105,6 +106,21 @@ time="2021-02-14T13:39:45Z" level=debug msg="Found nested key password in secret
 time="2021-02-14T13:39:45Z" level=debug msg="Found absolute path /bin/sh"
 decrypted value password
 ```
+
+## Usage
+
+Add the following label to the pods or deployments you wish to send to the webhook:
+```yaml
+metadata:
+  labels:
+    asm-webhook: "true"
+  ...
+  env:
+    - name: KEY_ID
+      value: arn:aws:secretsmanager:us-east-1:111111111111:secret:key-us-cmo1Hc
+```
+It's the service account of the pod that will fetch the secret so make sure to give it proper access rights.
+Check the [pod.yaml](./sample/pod.yaml) file for a full example
 
 ## Prerequisites
 
@@ -124,7 +140,7 @@ Secrets stored in SecretsManager can be of two formats:
 * Flat JSON
 You can specify which JSON key to fetch by adding it after the character **#**.
 
-If the secret `arn:aws:secretsmanager:us-east-1:886477354405:secret:key-us-cmo1Hc` contains  `{"user":"test", "password": "secret"}` then you can choose to only fetch the password key as such:
+If the secret `arn:aws:secretsmanager:us-east-1:111111111111:secret:key-us-cmo1Hc` contains  `{"user":"test", "password": "secret"}` then you can choose to only fetch the password key as such:
 ```yaml
 DB_PASS: arn:aws:secretsmanager:us-east-1:886477354405:secret:key-us-cmo1Hc#password
 ```
