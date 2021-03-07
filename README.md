@@ -2,10 +2,6 @@
 
 <p align="center">
 
-  <a href="#">
-    <img src="https://github.com/ayoul3/asm-webhook/workflows/Go/badge.svg" alt="Github tests">
-  </a>
-
   <a target="_blank" href="https://github.com/ayoul3/asm-webhook/releases">
     <img src="https://img.shields.io/github/v/release/ayoul3/asm-webhook" alt="Build release">
   </a>
